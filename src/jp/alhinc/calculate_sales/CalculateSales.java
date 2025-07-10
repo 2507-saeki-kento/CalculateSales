@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CalculateSales {
@@ -30,6 +32,8 @@ public class CalculateSales {
 		Map<String, String> branchNames = new HashMap<>();
 		// 支店コードと売上金額を保持するMap
 		Map<String, Long> branchSales = new HashMap<>();
+		//売り上げファイルの読み込み
+		BufferedReader br = null;
 
 		// 支店定義ファイル読み込み処理
 		if(!readFile(args[0], FILE_NAME_BRANCH_LST, branchNames, branchSales)) {
@@ -47,7 +51,56 @@ public class CalculateSales {
 		}
 
 		//matchesを使用してファイル名が「数字8桁.rcd」なのか判断します。
-		if(args[0].matches("^[0-9] +{8}"+".rcd$"))
+		if("rcdFiles".matches("^[0-9] +{8}+.rcd$")) {
+
+
+			//先にファイルの情報を格納する List(Array)を宣言します。
+            List<File>rcdFiles=new ArrayList<>();
+
+			for(int i=0;i<files.length;i++) {
+				if("rcdFiles".matches("^[0-9] +{8}+.rcd$"))
+			//売上ファイルの条件に当てはまったものだけ、List(ArrayList)に追加します。
+ 			rcdFiles.add(files[i]);
+		    }
+
+			//rcdFilesに複数の売り上げファイルの情報を格納しているので、その数だけ繰り返します。
+			for(int i=0;i<rcdFiles.size();i++) {
+
+				//①売り上げファイルを読み込む
+				//②Listに読み込みたい
+				//③型変換
+				//④足し算
+				//⑤マップに格納
+
+
+				//支店定義ファイル読み込み(readFilesメゾット)を参考に売り上げファイルの中身を読み込みます。
+				//売り上げファイルの1行目には支店コード、２行目には売上金額が入っています。
+				try {
+					File file = new File("rcdFiles");
+					FileReader fr = new FileReader(file);
+					br = new BufferedReader(fr);
+
+					String line;
+
+					//１行ずつ読み込む
+					while((line=br.readLine()) !=null) {
+
+					}
+
+				}
+
+				//売上ファイルから読み込んだ売上金額をMapに加算していくために、型の変換を行います。
+				//※詳細は後述で説明
+				long fileSale = Long.parseLong(売上⾦額);
+
+				//読み込んだ売上⾦額を加算します。
+				//※詳細は後述で説明
+				Long saleAmount = 売上⾦額を⼊れたMap.get(⽀店コード) + long に変換した売上⾦額;
+
+				//加算した売上⾦額をMapに追加します。
+
+			}
+		}
 
 
 
