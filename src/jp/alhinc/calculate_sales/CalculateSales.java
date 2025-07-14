@@ -1,8 +1,10 @@
 package jp.alhinc.calculate_sales;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -98,7 +100,7 @@ public class CalculateSales {
 					branchSales.put(sales.get(0),saleAmount);
 
 				} catch(IOException e) {
-					System.out.println(UNKNOWN_ERROR);
+					System.out.println("支店定義ファイルが存在しません");
 				} finally {
 					// ファイルを開いている場合
 					if(br != null) {
@@ -106,7 +108,7 @@ public class CalculateSales {
 							// ファイルを閉じる
 							br.close();
 						} catch(IOException e) {
-							System.out.println(UNKNOWN_ERROR);
+							System.out.println("支店定義ファイルが存在しません");
 						}
 					}
 				}
@@ -157,7 +159,7 @@ public class CalculateSales {
 			}
 
 		} catch (IOException e) {
-			System.out.println(UNKNOWN_ERROR);
+			System.out.println("支店定義ファイルが存在しません");
 			return false;
 		} finally {
 			// ファイルを開いている場合
@@ -166,13 +168,14 @@ public class CalculateSales {
 					// ファイルを閉じる
 					br.close();
 				} catch (IOException e) {
-					System.out.println(UNKNOWN_ERROR);
+					System.out.println("支店定義ファイルが存在しません");
 					return false;
 				}
 			}
 		}
 		return true;
-	}
+		}
+
 
 	/**
 	 * 支店別集計ファイル書き込み処理
@@ -186,8 +189,39 @@ public class CalculateSales {
 	private static boolean writeFile(String path, String fileName, Map<String, String> branchNames,
 			Map<String, Long> branchSales) {
 		// ※ここに書き込み処理を作成してください。(処理内容3-1)
+		//ファイルを作る
+		BufferedWriter bw = null;
+
+		//書き込む準備をした
+		try {
+			File file = new File(path, fileName);
+			FileWriter fw = new FileWriter(file);
+			bw = new BufferedWriter(fw);
+
+			//拡張構文でkeyの一覧を取得
+		for (String key:branchNames.keySet()){
+
+			//writeメソッドで書き込んでいる
+			 bw.write(key +","+ branchNames.get(key) +","+ branchSales.get(key));
+			 bw.newLine();
+		}
+
+		} catch (IOException e) {
+			System.out.println("支店定義ファイルが存在しません");
+			return false;
+		}finally {
+			// ファイルを開いている場合
+			if (bw != null) {
+				try {
+					// ファイルを閉じる
+					bw.close();
+				} catch (IOException e) {
+					System.out.println("支店定義ファイルが存在しません");
+					return false;
+				}
+			}
+		}
 
 		return true;
 	}
-
 }
