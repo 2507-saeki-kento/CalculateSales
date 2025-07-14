@@ -38,89 +38,82 @@ public class CalculateSales {
 		BufferedReader br = null;
 
 		// 支店定義ファイル読み込み処理
-		if(!readFile(args[0], FILE_NAME_BRANCH_LST, branchNames, branchSales)) {
+		if (!readFile(args[0], FILE_NAME_BRANCH_LST, branchNames, branchSales)) {
 			return;
 		}
-
 
 		// listFilesを使用してfailesという配列に、
 		//指定したパスに存在する全てのファイル(または、ディレクトリ)の情報を格納します。
 		File[] files = new File(args[0]).listFiles();
 
 		//先に売上ファイルのを格納する Listを宣言。
-        List<File>rcdFiles = new ArrayList<>();
+		List<File> rcdFiles = new ArrayList<>();
 
 		//filesの数だけ繰り返すことで、
 		//指定したパスが存在する全てのファイル(または、ディレクトリ)の数だけ繰り返されます。
-		for(int i = 0; i < files.length ; i++) {
+		for (int i = 0; i < files.length; i++) {
 
 			//売り上げファイルを選別するために、名前を取得、変数に代入
 			String fileName = files[i].getName();
 
 			//matchesを使用してファイル名が「数字8桁.rcd」なのか判断します。
 			//gatNameで習得した売り上げファイルから「数字8桁.rcd」になるようにふるいにかける
-			if(fileName.matches("^[0-9]{8}.rcd$")) {
+			if (fileName.matches("^[0-9]{8}[.]rcd$")) {
 				//OKの時だけ、rcdFilesに追加
-	 			rcdFiles.add(files[i]);
+				rcdFiles.add(files[i]);
 			}
 		}
 
+		//rcdFilesに複数の売り上げファイルの情報を格納しているので、その数だけ繰り返します。
+		for (int i = 0; i < rcdFiles.size(); i++) {
 
+			//支店定義ファイル読み込み(readFilesメゾット)を参考に売り上げファイルの中身を読み込みます。
+			//売り上げファイルの1行目には支店コード、２行目には売上金額が入っています。
+			try {
 
-			//rcdFilesに複数の売り上げファイルの情報を格納しているので、その数だけ繰り返します。
-			for(int i=0;i<rcdFiles.size();i++) {
+				//読むために、まず一つファイルを開く
+				File file = new File(args[0], rcdFiles.get(i).getName());
+				FileReader fr = new FileReader(file);
+				br = new BufferedReader(fr);
 
-				//支店定義ファイル読み込み(readFilesメゾット)を参考に売り上げファイルの中身を読み込みます。
-				//売り上げファイルの1行目には支店コード、２行目には売上金額が入っています。
-				try {
+				String line;
 
-					//読むために、まず一つファイルを開く
-					File file = new File(args[0], rcdFiles.get(i).getName());
-					FileReader fr = new FileReader(file);
-					br = new BufferedReader(fr);
+				ArrayList<String> sales = new ArrayList<>();
 
-					String line;
-
-					ArrayList<String> sales = new ArrayList<>();
-
-					//nullじゃない限り、読み続ける、読んだものは一回lineに入る
-					while((line = br.readLine()) != null) {
-						//読んだら、Listに追加
-						sales.add(line);
-					}
-
-				    //売上ファイルから読み込んだ売上金額をMapに加算していくために、型の変換を行います。
-					//ファイルを開いて一つずつ探し出す必要がないから、上で書いたlist「sales」からgetする。
-					//売上は配列だと1番にあたるから(sales.get(1))になった。
-					long fileSale = Long.parseLong(sales.get(1));
-					//読み込んだ売上⾦額を加算します。
-					long saleAmount = branchSales.get(sales.get(0)) + fileSale;
-
-					//加算した売上⾦額をMapに追加します。
-					branchSales.put(sales.get(0),saleAmount);
-
-				} catch(IOException e) {
-					System.out.println("支店定義ファイルが存在しません");
-				} finally {
-					// ファイルを開いている場合
-					if(br != null) {
-						try {
-							// ファイルを閉じる
-							br.close();
-						} catch(IOException e) {
-							System.out.println("支店定義ファイルが存在しません");
-						}
-					}
+				//nullじゃない限り、読み続ける、読んだものは一回lineに入る
+				while ((line = br.readLine()) != null) {
+					//読んだら、Listに追加
+					sales.add(line);
 				}
 
+				//売上ファイルから読み込んだ売上金額をMapに加算していくために、型の変換を行います。
+				//ファイルを開いて一つずつ探し出す必要がないから、上で書いたlist「sales」からgetする。
+				//売上は配列だと1番にあたるから(sales.get(1))になった。
+				long fileSale = Long.parseLong(sales.get(1));
+				//読み込んだ売上⾦額を加算します。
+				long saleAmount = branchSales.get(sales.get(0)) + fileSale;
+
+				//加算した売上⾦額をMapに追加します。
+				branchSales.put(sales.get(0), saleAmount);
+
+			} catch (IOException e) {
+				System.out.println(UNKNOWN_ERROR);
+			} finally {
+				// ファイルを開いている場合
+				if (br != null) {
+					try {
+						// ファイルを閉じる
+						br.close();
+					} catch (IOException e) {
+						System.out.println(UNKNOWN_ERROR);
+					}
+				}
 			}
 
-
-
-
+		}
 
 		// 支店別集計ファイル書き込み処理
-		if(!writeFile(args[0], FILE_NAME_BRANCH_OUT, branchNames, branchSales)) {
+		if (!writeFile(args[0], FILE_NAME_BRANCH_OUT, branchNames, branchSales)) {
 			return;
 		}
 
@@ -159,7 +152,7 @@ public class CalculateSales {
 			}
 
 		} catch (IOException e) {
-			System.out.println("支店定義ファイルが存在しません");
+			System.out.println(UNKNOWN_ERROR);
 			return false;
 		} finally {
 			// ファイルを開いている場合
@@ -168,14 +161,13 @@ public class CalculateSales {
 					// ファイルを閉じる
 					br.close();
 				} catch (IOException e) {
-					System.out.println("支店定義ファイルが存在しません");
+					System.out.println(UNKNOWN_ERROR);
 					return false;
 				}
 			}
 		}
 		return true;
-		}
-
+	}
 
 	/**
 	 * 支店別集計ファイル書き込み処理
@@ -199,24 +191,24 @@ public class CalculateSales {
 			bw = new BufferedWriter(fw);
 
 			//拡張構文でkeyの一覧を取得
-		for (String key:branchNames.keySet()){
+			for (String key : branchNames.keySet()) {
 
-			//writeメソッドで書き込んでいる
-			 bw.write(key +","+ branchNames.get(key) +","+ branchSales.get(key));
-			 bw.newLine();
-		}
+				//writeメソッドで書き込んでいる
+				bw.write(key + "," + branchNames.get(key) + "," + branchSales.get(key));
+				bw.newLine();
+			}
 
 		} catch (IOException e) {
-			System.out.println("支店定義ファイルが存在しません");
+			System.out.println(UNKNOWN_ERROR);
 			return false;
-		}finally {
+		} finally {
 			// ファイルを開いている場合
 			if (bw != null) {
 				try {
 					// ファイルを閉じる
 					bw.close();
 				} catch (IOException e) {
-					System.out.println("支店定義ファイルが存在しません");
+					System.out.println(UNKNOWN_ERROR);
 					return false;
 				}
 			}
