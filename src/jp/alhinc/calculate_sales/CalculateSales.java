@@ -73,6 +73,11 @@ public class CalculateSales {
 
 				//読むために、まず一つファイルを開く
 				File file = new File(args[0], rcdFiles.get(i).getName());
+				File file = new File(args[0], rcdFiles.get(i).getName());
+				 //支店定義ファイルが存在しない場合、コンソールにエラーメッセージを表示します。
+				if(!file.exists()) {
+					System.out.println(FILE_NOT_EXIST);
+				}
 				FileReader fr = new FileReader(file);
 				br = new BufferedReader(fr);
 
