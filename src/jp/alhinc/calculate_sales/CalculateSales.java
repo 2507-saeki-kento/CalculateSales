@@ -63,6 +63,20 @@ public class CalculateSales {
 				rcdFiles.add(files[i]);
 			}
 		}
+		//比較回数は売上ファイルの数よりも1回少ないため、
+		//繰り返し回数は売上ファイルのリストの数よりも1つ小さい数です。
+		for (int i = 0; i < rcdFiles.size() - 1; i++) {
+
+			int former = Integer.parseInt(files[i].getName().substring(0, 8));
+			int latter = Integer.parseInt(次のファイル名.substring(0, 8));
+
+			//比較する2つのファイル名の先頭から数字の8文字を切り出し、int型に変換します。
+			//2つのファイル名の数字を比較して、差が1ではなかったら、
+			//エラーメッセージをコンソールに表示します。
+			if ((latter - former) != 1) {
+				System.out.println("売上ファイル名が連番になっていません");
+			}
+		}
 
 		//rcdFilesに複数の売り上げファイルの情報を格納しているので、その数だけ繰り返します。
 		for (int i = 0; i < rcdFiles.size(); i++) {
@@ -82,6 +96,7 @@ public class CalculateSales {
 
 				//nullじゃない限り、読み続ける、読んだものは一回lineに入る
 				while ((line = br.readLine()) != null) {
+
 					//読んだら、Listに追加
 					sales.add(line);
 				}
@@ -143,22 +158,23 @@ public class CalculateSales {
 			br = new BufferedReader(fr);
 
 			String line;
+			String[] items;
 			// 一行ずつ読み込む
 			while ((line = br.readLine()) != null) {
 				//split を使って「,」(カンマ)で分割すること
 				//items[0]には支店コード、items[1]には支店名が格納される
-				String[] items = line.split(",");
+				items = line.split(",");
 
+				//支店定義ファイルの仕様が満たしているかふるいにかける
+				if ((items.length != 2) || (!items[0].matches("^[0-9]{3}$"))) {
+				}
 				//Mapに追加する2つの情報をputの引数として指定する。
 				branchNames.put(items[0], items[1]);
 				branchSales.put(items[0], 0L);
 
 				System.out.println(line);
 			}
-			//支店定義ファイルの仕様が満たされていない場合、
 			//エラーメッセージをコンソールに表示します。
-			if ((配列.length != 2) || (!支店コード.matches("^[0-9]{3}$"))) {
-			}
 		} catch (IOException e) {
 			System.out.println(FILE_INVALID_FORMAT);
 			return false;
