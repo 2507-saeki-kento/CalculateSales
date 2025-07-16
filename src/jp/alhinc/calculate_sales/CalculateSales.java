@@ -23,6 +23,9 @@ public class CalculateSales {
 	private static final String UNKNOWN_ERROR = "予期せぬエラーが発生しました";
 	private static final String FILE_NOT_EXIST = "支店定義ファイルが存在しません";
 	private static final String FILE_INVALID_FORMAT = "支店定義ファイルのフォーマットが不正です";
+	private static final String FILE_NOT_SEQUENTIAL = "売上ファイル名が連番になっていません";
+	private static final String OVER_THE_10_DIGITS = "合計金額が10桁を超えました";
+	private static final String KEY_NOT_EXIST = "の支店コードが不正です";
 
 	/**
 	 * メインメソッド
@@ -67,14 +70,14 @@ public class CalculateSales {
 		//繰り返し回数は売上ファイルのリストの数よりも1つ小さい数です。
 		for (int i = 0; i < rcdFiles.size() - 1; i++) {
 
-			int former = Integer.parseInt(files[i].getName().substring(0, 8));
-			int latter = Integer.parseInt(次のファイル名.substring(0, 8));
+			int former = Integer.parseInt(rcdFiles.get(i).getName().substring(0, 8));
+			int latter = Integer.parseInt(rcdFiles.get(i + 1).getName().substring(0, 8));
 
 			//比較する2つのファイル名の先頭から数字の8文字を切り出し、int型に変換します。
 			//2つのファイル名の数字を比較して、差が1ではなかったら、
 			//エラーメッセージをコンソールに表示します。
 			if ((latter - former) != 1) {
-				System.out.println("売上ファイル名が連番になっていません");
+				System.out.println(FILE_NOT_SEQUENTIAL);
 			}
 		}
 
@@ -100,15 +103,25 @@ public class CalculateSales {
 					//読んだら、Listに追加
 					sales.add(line);
 				}
+				if (!branchNames.containsKey(sales.get(0))) {
+					System.out.println(file.getName() + KEY_NOT_EXIST);
+					return;
+					//⽀店情報を保持しているMapに売上ファイルの⽀店コードが存在しなかった場合は、
+					//エラーメッセージをコンソールに表⽰します。
+				}
 
 				//売上ファイルから読み込んだ売上金額をMapに加算していくために、型の変換を行います。
 				//ファイルを開いて一つずつ探し出す必要がないから、上で書いたlist「sales」からgetする。
 				//売上は配列だと1番にあたるから(sales.get(1))になった。
 				long fileSale = Long.parseLong(sales.get(1));
-				//読み込んだ売上⾦額を加算します。
+				//読み込んだ売上金額を加算します。
 				long saleAmount = branchSales.get(sales.get(0)) + fileSale;
-
-				//加算した売上⾦額をMapに追加します。
+				//11桁以上になったらエラーメッセージを表示し処理を終了する。
+				if (saleAmount >= 10000000000L) {
+					System.out.println(OVER_THE_10_DIGITS);
+					return;
+				}
+				//加算した売上金額をMapに追加します。
 				branchSales.put(sales.get(0), saleAmount);
 
 			} catch (IOException e) {
@@ -167,16 +180,16 @@ public class CalculateSales {
 
 				//支店定義ファイルの仕様が満たしているかふるいにかける
 				if ((items.length != 2) || (!items[0].matches("^[0-9]{3}$"))) {
+					System.out.println(FILE_INVALID_FORMAT);
+					return false;
 				}
 				//Mapに追加する2つの情報をputの引数として指定する。
 				branchNames.put(items[0], items[1]);
 				branchSales.put(items[0], 0L);
-
-				System.out.println(line);
 			}
 			//エラーメッセージをコンソールに表示します。
 		} catch (IOException e) {
-			System.out.println(FILE_INVALID_FORMAT);
+			System.out.println(UNKNOWN_ERROR);
 			return false;
 		} finally {
 			// ファイルを開いている場合
