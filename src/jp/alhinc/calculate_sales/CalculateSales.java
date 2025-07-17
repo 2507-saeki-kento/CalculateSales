@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,6 @@ public class CalculateSales {
 	private static final String OVER_THE_10_DIGITS = "合計金額が10桁を超えました";
 	private static final String KEY_NOT_EXIST = "の支店コードが不正です";
 	private static final String INVALID_FORMAT = "のフォーマットが不正です";
-	private static final String UNEXPECTED_ERROR = "予期せぬエラーが発生しました";
 
 	/**
 	 * メインメソッド
@@ -44,7 +44,7 @@ public class CalculateSales {
 		if (args.length != 1) {
 			//コマンドライン引数が1つ以上か以下の設定の場合は、
 			//エラーメッセージをコンソールに表示します。
-			System.out.println(UNEXPECTED_ERROR);
+			System.out.println(UNKNOWN_ERROR);
 			return;
 		}
 
@@ -76,6 +76,8 @@ public class CalculateSales {
 			}
 
 		}
+
+		Collections.sort(rcdFiles);
 		//比較回数は売上ファイルの数よりも1回少ないため、
 		//繰り返し回数は売上ファイルのリストの数よりも1つ小さい数です。
 		for (int i = 0; i < rcdFiles.size() - 1; i++) {
@@ -88,6 +90,7 @@ public class CalculateSales {
 			//エラーメッセージをコンソールに表示します。
 			if ((latter - former) != 1) {
 				System.out.println(FILE_NOT_SEQUENTIAL);
+				return;
 			}
 		}
 
@@ -113,22 +116,22 @@ public class CalculateSales {
 					//読んだら、Listに追加
 					sales.add(line);
 				}
-				if (!branchNames.containsKey(sales.get(0))) {
-					System.out.println(file.getName() + KEY_NOT_EXIST);
-					return;
-					//⽀店情報を保持しているMapに売上ファイルの⽀店コードが存在しなかった場合は、
-					//エラーメッセージをコンソールに表⽰します。
-				}
 				if (sales.size() != 2) {
 					//売上ファイルの⾏数が2⾏ではなかった場合は、
 					//エラーメッセージをコンソールに表⽰します。
 					System.out.println(file.getName() + INVALID_FORMAT);
 					return;
 				}
+				if (!branchNames.containsKey(sales.get(0))) {
+					System.out.println(file.getName() + KEY_NOT_EXIST);
+					return;
+					//⽀店情報を保持しているMapに売上ファイルの⽀店コードが存在しなかった場合は、
+					//エラーメッセージをコンソールに表⽰します。
+				}
 				//売上金額が数字ではなかった場合は、
 				//エラーメッセージをコンソールに表示します。
 				if (!sales.get(1).matches("^[0-9]*$")) {
-					System.out.println(UNEXPECTED_ERROR);
+					System.out.println(UNKNOWN_ERROR);
 					return;
 				}
 				//売上ファイルから読み込んだ売上金額をMapに加算していくために、型の変換を行います。
@@ -147,6 +150,7 @@ public class CalculateSales {
 
 			} catch (IOException e) {
 				System.out.println(UNKNOWN_ERROR);
+				return;
 			} finally {
 				// ファイルを開いている場合
 				if (br != null) {
@@ -155,6 +159,7 @@ public class CalculateSales {
 						br.close();
 					} catch (IOException e) {
 						System.out.println(UNKNOWN_ERROR);
+						return;
 					}
 				}
 			}
@@ -187,6 +192,7 @@ public class CalculateSales {
 			//支店定義ファイルが存在しない場合、コンソールにエラーメッセージを表示します。
 			if (!file.exists()) {
 				System.out.println(FILE_NOT_EXIST);
+				return false;
 			}
 			FileReader fr = new FileReader(file);
 			br = new BufferedReader(fr);
