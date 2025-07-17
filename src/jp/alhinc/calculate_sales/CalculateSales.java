@@ -26,6 +26,8 @@ public class CalculateSales {
 	private static final String FILE_NOT_SEQUENTIAL = "売上ファイル名が連番になっていません";
 	private static final String OVER_THE_10_DIGITS = "合計金額が10桁を超えました";
 	private static final String KEY_NOT_EXIST = "の支店コードが不正です";
+	private static final String INVALID_FORMAT = "のフォーマットが不正です";
+	private static final String UNEXPECTED_ERROR = "予期せぬエラーが発生しました";
 
 	/**
 	 * メインメソッド
@@ -39,6 +41,12 @@ public class CalculateSales {
 		Map<String, Long> branchSales = new HashMap<>();
 		//売り上げファイルの読み込み
 		BufferedReader br = null;
+		if (args.length != 1) {
+			//コマンドライン引数が1つ以上か以下の設定の場合は、
+			//エラーメッセージをコンソールに表示します。
+			System.out.println(UNEXPECTED_ERROR);
+			return;
+		}
 
 		// 支店定義ファイル読み込み処理
 		if (!readFile(args[0], FILE_NAME_BRANCH_LST, branchNames, branchSales)) {
@@ -61,10 +69,12 @@ public class CalculateSales {
 
 			//matchesを使用してファイル名が「数字8桁.rcd」なのか判断します。
 			//gatNameで習得した売り上げファイルから「数字8桁.rcd」になるようにふるいにかける
-			if (fileName.matches("^[0-9]{8}[.]rcd$")) {
+			//対象がファイルであり、「数字8桁.rcd」なのか判定します。
+			if (files[i].isFile() && fileName.matches("^[0-9]{8}[.]rcd$")) {
 				//OKの時だけ、rcdFilesに追加
 				rcdFiles.add(files[i]);
 			}
+
 		}
 		//比較回数は売上ファイルの数よりも1回少ないため、
 		//繰り返し回数は売上ファイルのリストの数よりも1つ小さい数です。
@@ -109,7 +119,18 @@ public class CalculateSales {
 					//⽀店情報を保持しているMapに売上ファイルの⽀店コードが存在しなかった場合は、
 					//エラーメッセージをコンソールに表⽰します。
 				}
-
+				if (sales.size() != 2) {
+					//売上ファイルの⾏数が2⾏ではなかった場合は、
+					//エラーメッセージをコンソールに表⽰します。
+					System.out.println(file.getName() + INVALID_FORMAT);
+					return;
+				}
+				//売上金額が数字ではなかった場合は、
+				//エラーメッセージをコンソールに表示します。
+				if (!sales.get(1).matches("^[0-9]*$")) {
+					System.out.println(UNEXPECTED_ERROR);
+					return;
+				}
 				//売上ファイルから読み込んだ売上金額をMapに加算していくために、型の変換を行います。
 				//ファイルを開いて一つずつ探し出す必要がないから、上で書いたlist「sales」からgetする。
 				//売上は配列だと1番にあたるから(sales.get(1))になった。
